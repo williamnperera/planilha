@@ -1980,6 +1980,67 @@
             setInterval(updateCurrentDateTime, 1000);
         });
     </script>
+
+<!-- Supabase Client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = "https://wutgchhrcovbrzynefiu.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1dGdjaGhyY292YnJ6eW5lZml1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIxNTczMDIsImV4cCI6MjA2NzczMzMwMn0.I6KV9MpO_dHD-GI3KFKXFVnZJIOiHsQ0RoKXdJ9staU";
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  async function carregarDadosSupabase() {
+    const { data, error } = await supabase.from("acertos").select("*").order("criado_em", { ascending: true });
+    if (error) {
+      console.error("Erro ao carregar dados:", error);
+      return;
+    }
+    data.forEach(dado => {
+      const novaLinha = createNewRow({
+        name: dado.nome,
+        valorMensal: dado.valor_mensal,
+        date: dado.data_acerto,
+        category: dado.categoria,
+        type: dado.tipo,
+        recorrente: dado.recorrente,
+        conciliado: dado.conciliado
+      });
+      acertosTableBody.appendChild(novaLinha);
+    });
+    updateTotal();
+  }
+
+  async function salvarDadoSupabase(dado) {
+    const { error } = await supabase.from("acertos").insert([{
+      nome: dado.name,
+      valor_mensal: dado.valorMensal,
+      data_acerto: dado.date,
+      categoria: dado.category,
+      tipo: dado.type,
+      recorrente: dado.recorrente,
+      conciliado: dado.conciliado
+    }]);
+    if (error) {
+      console.error("Erro ao salvar:", error);
+    } else {
+      showMessage("Dado salvo com sucesso!");
+    }
+  }
+
+  // Substitui o saveDataAndApplyFilters
+  function saveDataAndApplyFilters() {
+    const dados = getCurrentTableData();
+    if (dados.length > 0) {
+      salvarDadoSupabase(dados[dados.length - 1]);
+    }
+    updateTotal();
+  }
+
+  // Substitui o carregamento localStorage
+  window.addEventListener("DOMContentLoaded", () => {
+    carregarDadosSupabase();
+  });
+</script>
+
 </body>
 </html>
 
