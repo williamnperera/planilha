@@ -1,0 +1,1988 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planilha de Controle de Acertos (Entradas Recebidas e Previstas Ajustadas)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos personalizados para a fonte Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f5; /* Fundo off-white */
+            color: #333; /* Cor de texto padrão */
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.dark-mode {
+            background-color: #000000; /* Fundo preto */
+            color: #ffffff; /* Cor de texto branco */
+        }
+        body.dark-mode .bg-white {
+            background-color: #1a1a1a; /* Fundo de card escuro */
+            color: #ffffff;
+        }
+        body.dark-mode .bg-gray-100 {
+            background-color: #333333; /* Fundo de seção escuro */
+            color: #ffffff;
+        }
+        body.dark-mode .bg-black {
+            background-color: #1a1a1a; /* Cabeçalho de tabela escuro */
+        }
+        body.dark-mode .bg-gray-900 {
+            background-color: #1a1a1a; /* Fundo de resumo escuro */
+        }
+        body.dark-mode .border-gray-700 {
+            border-color: #555555;
+        }
+        body.dark-mode .text-black {
+            color: #ffffff;
+        }
+        body.dark-mode .text-gray-800 {
+            color: #cccccc;
+        }
+        body.dark-mode .text-gray-700 {
+            color: #aaaaaa;
+        }
+        body.dark-mode .text-gray-600 {
+            color: #dddddd;
+        }
+        body.dark-mode .text-red-500, body.dark-mode .text-red-600, body.dark-mode .text-red-700, body.dark-mode .text-red-800, body.dark-mode .text-red-900 {
+            color: #ff6666; /* Tons de vermelho para dark mode */
+        }
+        body.dark-mode .table-input, body.dark-mode .table-select {
+            background-color: #333333;
+            border-color: #666666;
+            color: #ffffff;
+        }
+        body.dark-mode .table-input::placeholder {
+            color: #aaaaaa;
+        }
+        body.dark-mode .table-input:focus, body.dark-mode .table-select:focus {
+            border-color: #ff6666;
+            box-shadow: 0 0 0 3px rgba(255, 102, 102, 0.3);
+        }
+        body.dark-mode .even\:bg-gray-100 {
+            background-color: #1a1a1a;
+        }
+        body.dark-mode .odd\:bg-white {
+            background-color: #000000;
+        }
+        body.dark-mode .hover\:bg-gray-100:hover {
+            background-color: #333333;
+        }
+        body.dark-mode .remove-row-btn {
+            background-color: #cc0000;
+        }
+        body.dark-mode .remove-row-btn:hover {
+            background-color: #990000;
+        }
+        body.dark-mode #message-box {
+            background-color: #cc0000; /* Vermelho para sucesso em dark mode */
+        }
+        body.dark-mode #message-box.error {
+            background-color: #990000; /* Vermelho mais escuro para erro em dark mode */
+        }
+
+
+        /* Garantir que as células da tabela tenham algum preenchimento */
+        td, th {
+            padding: 1rem; /* Preenchimento aumentado para melhor espaçamento */
+            text-align: left;
+        }
+        /* Estilo para os campos de entrada dentro da tabela */
+        .table-input {
+            width: 100%;
+            padding: 0.6rem; /* Preenchimento ligeiramente maior */
+            border: 1px solid #d1d5db; /* Borda cinza mais clara */
+            border-radius: 0.5rem; /* Cantos mais arredondados */
+            outline: none; /* Remover contorno no foco */
+            font-size: 0.95rem; /* Fonte ligeiramente maior */
+            transition: all 0.2s ease-in-out; /* Transição suave */
+        }
+        .table-input:focus {
+            border-color: #ef4444; /* Borda vermelha no foco */
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3); /* Sombra vermelha no foco */
+        }
+        /* Estilo para o dropdown de seleção */
+        .table-select {
+            width: 100%;
+            padding: 0.6rem; /* Preenchimento ligeiramente maior */
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            background-color: white;
+            appearance: none; /* Remover seta padrão */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'%3E%3C/path%3E%3C/svg%3E"); /* Seta personalizada */
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center; /* Posição ajustada */
+            background-size: 1.2em 1.2em; /* Seta ligeiramente menor */
+            font-size: 0.95rem; /* Fonte ligeiramente maior */
+            transition: all 0.2s ease-in-out;
+        }
+        .table-select:focus {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+        }
+        /* Estilo para a caixa de mensagem */
+        #message-box {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #ef4444; /* Vermelho */
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        #message-box.show {
+            opacity: 1;
+        }
+        /* Estilos base dos botões */
+        .btn-base {
+            padding: 0.75rem 1.5rem; /* Preenchimento aumentado */
+            font-weight: 600;
+            border-radius: 0.75rem; /* Mais arredondado */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+            transition: all 0.2s ease-in-out;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem; /* Espaço para ícone, se adicionado */
+        }
+        .btn-base:hover {
+            transform: translateY(-2px); /* Efeito de elevação no hover */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Sombra mais forte no hover */
+        }
+        .btn-base:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.4); /* Anel de foco vermelho */
+        }
+        /* Estilos para o botão de remover linha */
+        .remove-row-btn {
+            background-color: #dc2626; /* Vermelho mais escuro */
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s;
+        }
+        .remove-row-btn:hover {
+            background-color: #b91c1c; /* Vermelho ainda mais escuro no hover */
+        }
+        /* Estilo para o cabeçalho da tabela clicável para ordenação */
+        .sortable-header {
+            cursor: pointer;
+            user-select: none; /* Prevenir seleção de texto ao clicar */
+        }
+        .sortable-header:hover {
+            background-color: #1a1a1a; /* Preto mais claro no hover */
+        }
+        .sortable-header svg {
+            margin-left: 0.5rem;
+            transition: transform 0.2s;
+        }
+        .sortable-header.asc svg {
+            transform: rotate(180deg);
+        }
+
+        /* Estilos para as linhas com status */
+        .status-pago {
+            background-color: #f0f0f0; /* Cinza claro para pago */
+        }
+        body.dark-mode .status-pago {
+            background-color: #333333; /* Cinza escuro para dark mode */
+        }
+        .status-atrasado {
+            background-color: #fee2e2; /* Vermelho claro */
+        }
+        body.dark-mode .status-atrasado {
+            background-color: #991b1b; /* Vermelho escuro para dark mode */
+        }
+        /* Estilo para linhas recorrentes */
+        .recorrente-row {
+            border-left: 4px solid #ef4444; /* Borda vermelha */
+        }
+        body.dark-mode .recorrente-row {
+            border-left-color: #dc2626; /* Vermelho mais escuro para dark mode */
+        }
+        /* NOVO: Estilo para recebimentos atrasados */
+        .overdue-receipt-row {
+            background-color: #fcebeb; /* Fundo vermelho bem claro */
+            border-left: 4px solid #dc2626; /* Borda vermelha forte */
+        }
+        body.dark-mode .overdue-receipt-row {
+            background-color: #440000; /* Fundo vermelho escuro para dark mode */
+            border-left-color: #ff0000;
+        }
+
+
+        /* Animação de destaque de linha */
+        @keyframes highlight-add {
+            0% { background-color: #f0f0f0; } /* Cinza claro */
+            100% { background-color: transparent; }
+        }
+        @keyframes highlight-remove {
+            0% { background-color: #fee2e2; } /* Vermelho claro */
+            100% { background-color: transparent; }
+        }
+        .highlight-add {
+            animation: highlight-add 1.5s ease-out forwards;
+        }
+        .highlight-remove {
+            animation: highlight-remove 1.5s ease-out forwards;
+        }
+
+        /* Modal customizado */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        body.dark-mode .modal-content {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Estilos para o resizer de coluna */
+        .resizer {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 10px; /* Largura para facilitar o clique */
+            height: 100%;
+            background: transparent; /* Invisível por padrão */
+            cursor: col-resize;
+            z-index: 1; /* Garante que seja clicável */
+        }
+        .resizer:hover {
+            background: rgba(0, 0, 0, 0.1); /* Pequeno feedback visual no hover */
+        }
+        /* Quando ativamente redimensionando */
+        body.resizing {
+            cursor: col-resize; /* Cursor de redimensionamento em todo o corpo */
+            user-select: none; /* Evita seleção de texto durante o redimensionamento */
+        }
+        .resizing .resizer {
+            background: #ef4444; /* Cor vermelha quando arrastando */
+        }
+        /* Torna os th elementos com posição relativa para o posicionamento absoluto do resizer */
+        th {
+            position: relative;
+        }
+        /* Garante que a tabela use layout fixo para controle de largura de coluna */
+        table {
+            table-layout: fixed;
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="p-6 flex flex-col items-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-6xl mb-10">
+        <h1 class="text-4xl font-extrabold text-black mb-8 text-center">Planilha de Controle de Acertos</h1>
+
+        <!-- Data e Hora Atual -->
+        <div class="text-center text-lg font-semibold text-gray-700 mb-4">
+            Data e Hora Atual: <span id="current-datetime" class="text-black"></span>
+        </div>
+
+        <!-- Botão de Modo Escuro -->
+        <div class="flex justify-end mb-4">
+            <button id="dark-mode-toggle" class="btn-base bg-gray-800 text-white hover:bg-black px-4 py-2 text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                </svg>
+                Modo Escuro
+            </button>
+        </div>
+
+        <!-- Seção de Filtros e Pesquisa -->
+        <div class="mb-8 p-6 bg-gray-100 rounded-lg shadow-inner border border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Filtros e Pesquisa</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                    <label for="search-input" class="block text-sm font-medium text-gray-700 mb-1">Pesquisar por Nome/Categoria:</label>
+                    <input type="text" id="search-input" placeholder="Digite para pesquisar..." class="table-input">
+                </div>
+                <div>
+                    <label for="filter-category" class="block text-sm font-medium text-gray-700 mb-1">Filtrar por Categoria:</label>
+                    <select id="filter-category" class="table-select">
+                        <option value="">Todas as Categorias</option>
+                        <!-- As opções serão populadas por JS -->
+                    </select>
+                </div>
+                <div>
+                    <label for="filter-type" class="block text-sm font-medium text-gray-700 mb-1">Filtrar por Tipo:</label>
+                    <select id="filter-type" class="table-select">
+                        <option value="">Todos os Tipos</option>
+                        <option value="ENTRADA">ENTRADA</option>
+                        <option value="SAÍDA">SAÍDA</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="filter-recorrente" class="block text-sm font-medium text-gray-700 mb-1">Filtrar por Recorrente:</label>
+                    <select id="filter-recorrente" class="table-select">
+                        <option value="">Todos</option>
+                        <option value="Sim">Sim</option>
+                        <option value="Não">Não</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="filter-conciliado" class="block text-sm font-medium text-gray-700 mb-1">Filtrar por Conciliado:</label>
+                    <select id="filter-conciliado" class="table-select">
+                        <option value="">Todos</option>
+                        <option value="Sim">Sim</option>
+                        <option value="Não">Não</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="filter-month" class="block text-sm font-medium text-gray-700 mb-1">Filtrar por Mês:</label>
+                    <select id="filter-month" class="table-select">
+                        <option value="">Todos os Meses</option>
+                        <option value="1">Janeiro</option>
+                        <option value="2">Fevereiro</option>
+                        <option value="3">Março</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Maio</option>
+                        <option value="6">Junho</option>
+                        <option value="7">Julho</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="filter-year" class="block text-sm font-medium text-gray-700 mb-1">Filtrar por Ano:</label>
+                    <select id="filter-year" class="table-select">
+                        <option value="">Todos os Anos</option>
+                        <!-- Anos serão populados por JS -->
+                    </select>
+                </div>
+                <div>
+                    <label for="filter-start-date" class="block text-sm font-medium text-gray-700 mb-1">Data de Início:</label>
+                    <input type="date" id="filter-start-date" class="table-input">
+                </div>
+                <div>
+                    <label for="filter-end-date" class="block text-sm font-medium text-gray-700 mb-1">Data de Fim:</label>
+                    <input type="date" id="filter-end-date" class="table-input">
+                </div>
+            </div>
+            <!-- Contador de linhas visíveis -->
+            <div class="mt-4 text-right text-sm font-semibold text-gray-700">
+                Linhas Visíveis: <span id="visible-row-count" class="text-black">0</span>
+            </div>
+        </div>
+
+        <!-- Seção de Gerenciamento de Categorias -->
+        <div class="mb-10 p-6 bg-gray-100 rounded-lg shadow-inner border border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Gerenciar Categorias</h2>
+            <div class="flex flex-col sm:flex-row gap-4 items-end">
+                <div class="flex-grow">
+                    <label for="new-category-input" class="block text-sm font-medium text-gray-700 mb-1">Nova Categoria:</label>
+                    <input type="text" id="new-category-input" placeholder="Adicionar nova categoria..." class="table-input">
+                </div>
+                <button id="add-category-btn" class="btn-base bg-red-600 text-white hover:bg-red-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    Adicionar Categoria
+                </button>
+                <button id="remove-category-btn" class="btn-base bg-red-700 text-white hover:bg-red-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zm-1 3a1 1 0 011-1h4a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 000 2h4a1 1 0 100-2H7z" clip-rule="evenodd" />
+                    </svg>
+                    Remover Categoria Selecionada
+                </button>
+            </div>
+            <div class="mt-4">
+                <label for="select-category-to-remove" class="block text-sm font-medium text-gray-700 mb-1">Selecionar Categoria para Remover:</label>
+                <select id="select-category-to-remove" class="table-select w-full max-w-xs">
+                    <!-- As opções serão populadas por JS -->
+                </select>
+            </div>
+        </div>
+
+        <!-- Aba Principal: Acertos Mensais -->
+        <div id="acertos-mensais-tab" class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 border-b-2 border-red-500 pb-2">Acertos Mensais</h2>
+            <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+                <table class="min-w-full bg-white">
+                    <thead class="bg-black text-white">
+                        <tr>
+                            <th class="py-3 px-4 text-left font-semibold sortable-header" data-sort-by="name">
+                                NOME
+                                <svg class="inline-block h-4 w-4 ml-1 opacity-50" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3z" clip-rule="evenodd"></path></svg>
+                                <div class="resizer" data-column-index="0"></div>
+                            </th>
+                            <th class="py-3 px-4 text-left font-semibold sortable-header" data-sort-by="valorMensal">
+                                VALOR MENSAL
+                                <svg class="inline-block h-4 w-4 ml-1 opacity-50" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3z" clip-rule="evenodd"></path></svg>
+                                <div class="resizer" data-column-index="1"></div>
+                            </th>
+                            <th class="py-3 px-4 text-left font-semibold sortable-header" data-sort-by="date">
+                                DATA DE ACERTO
+                                <svg class="inline-block h-4 w-4 ml-1 opacity-50" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3z" clip-rule="evenodd"></path></svg>
+                                <div class="resizer" data-column-index="2"></div>
+                            </th>
+                            <th class="py-3 px-4 text-left font-semibold">
+                                CATEGORIA
+                                <div class="resizer" data-column-index="3"></div>
+                            </th>
+                            <th class="py-3 px-4 text-left font-semibold">
+                                TIPO
+                                <div class="resizer" data-column-index="4"></div>
+                            </th>
+                            <th class="py-3 px-4 text-left font-semibold">
+                                RECORRENTE
+                                <div class="resizer" data-column-index="5"></div>
+                            </th>
+                            <th class="py-3 px-4 text-left font-semibold">
+                                CONCILIADO
+                                <div class="resizer" data-column-index="6"></div>
+                            </th>
+                            <th class="py-3 px-4 text-left font-semibold rounded-tr-lg">AÇÕES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="acertos-table-body">
+                        <!-- As linhas serão carregadas do localStorage ou adicionadas dinamicamente -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex flex-col sm:flex-row justify-between mt-6 gap-4">
+                <button id="add-row-btn" class="btn-base bg-red-600 text-white hover:bg-red-700">
+                    <!-- Ícone de mais para Adicionar Linha -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    Adicionar Linha
+                </button>
+                <button id="save-data-btn" class="btn-base bg-red-600 text-white hover:bg-red-700">
+                    <!-- Ícone de salvar para Salvar Dados -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7z" />
+                        <path fill-rule="evenodd" d="M18 8H2V6a2 2 0 012-2h3a2 2 0 012-2h2a2 2 0 012 2h3a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V8zm3-1a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h16a1 1 0 001-1V7z" clip-rule="evenodd" />
+                        <path d="M10 12a2 2 0 100 4 2 2 0 000-4z" />
+                    </svg>
+                    Salvar Dados
+                </button>
+                <button id="export-csv-btn" class="btn-base bg-gray-800 text-white hover:bg-black">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3 17a1 1 0 01-1-1V6a1 1 0 011-1h5.172a2 2 0 011.414.586l2.828 2.828a2 2 0 001.414.586H17a1 1 0 011 1v6a1 1 0 01-1 1H3zm13-5a1 1 0 100 2h1a1 1 0 100-2h-1zM5 9a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1v-1a1 1 0 00-1-1H5z" clip-rule="evenodd" />
+                    </svg>
+                    Exportar CSV
+                </button>
+                <input type="file" id="import-csv-input" accept=".csv" class="hidden">
+                <button id="import-csv-btn" class="btn-base bg-gray-800 text-white hover:bg-black">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3 17a1 1 0 01-1-1V6a1 1 0 011-1h5.172a2 2 0 011.414.586l2.828 2.828a2 2 0 001.414.586H17a1 1 0 011 1v6a1 1 0 01-1 1H3zm13-5a1 1 0 100 2h1a1 1 0 100-2h-1zM5 9a1 1 0 00-1 1v1a1 1 0 001 1h1a1 1 0 001-1v-1a1 1 0 00-1-1H5z" clip-rule="evenodd" />
+                    </svg>
+                    Importar CSV
+                </button>
+                <button id="undo-btn" class="btn-base bg-gray-800 text-white hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414L7 9.586V7a1 1 0 10-2 0v4a1 1 0 001 1h4a1 1 0 100-2H7.414l2.293-2.293z" clip-rule="evenodd" />
+                    </svg>
+                    Desfazer
+                </button>
+                <button id="redo-btn" class="btn-base bg-gray-800 text-white hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 2a8 8 0 100 16 8 8 0 000-16zm-.707 10.293a1 1 0 001.414 1.414L13 10.414V13a1 1 0 102 0V9a1 1 0 00-1-1h-4a1 1 0 100 2h2.586l-2.293 2.293z" clip-rule="evenodd" />
+                    </svg>
+                    Refazer
+                </button>
+            </div>
+        </div>
+
+        <!-- Seção de Orçamento Mensal -->
+        <div class="mb-10 p-6 bg-gray-100 rounded-xl shadow-inner border border-gray-200">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 border-b-2 border-red-500 pb-2">Orçamento Mensal</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center text-center">
+                <div>
+                    <label for="monthly-budget-input" class="block text-xl font-semibold text-gray-700 mb-2">Definir Orçamento:</label>
+                    <input type="number" id="monthly-budget-input" step="0.01" value="0.00" class="table-input text-center text-2xl font-bold text-black">
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <span class="text-xl font-semibold text-gray-700 block mb-2">TOTAL GASTO (SAÍDAS):</span>
+                    <span id="budget-total-saidas" class="text-3xl font-extrabold text-red-800">R$ 0.00</span>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <span class="text-xl font-semibold text-gray-700 block mb-2">RESTANTE DO ORÇAMENTO:</span>
+                    <span id="budget-remaining" class="text-3xl font-extrabold text-black">R$ 0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba de Resumo: Totais -->
+        <div id="total-mensal-tab" class="bg-gray-900 p-8 rounded-xl shadow-inner border border-gray-700">
+            <h2 class="text-3xl font-bold text-white mb-6 border-b-2 border-red-500 pb-2">Resumo Financeiro</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <span class="text-xl font-semibold text-black block mb-2">TOTAL ENTRADAS:</span>
+                    <span id="total-entradas" class="text-3xl font-extrabold text-black">R$ 0.00</span>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <span class="text-xl font-semibold text-black block mb-2">TOTAL SAÍDAS:</span>
+                    <span id="total-saidas" class="text-3xl font-extrabold text-red-800">R$ 0.00</span>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <span class="text-xl font-semibold text-black block mb-2">SALDO DE CAIXA:</span>
+                    <span id="saldo-caixa" class="text-4xl font-extrabold text-black">R$ 0.00</span>
+                </div>
+            </div>
+
+            <!-- Entradas Recebidas e Previstas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 text-center">
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <span class="text-xl font-semibold text-black block mb-2">ENTRADAS RECEBIDAS:</span>
+                    <span id="total-entradas-recebidas" class="text-3xl font-extrabold text-black">R$ 0.00</span>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <span class="text-xl font-semibold text-black block mb-2">ENTRADAS PREVISTAS:</span>
+                    <span id="total-entradas-previstas" class="text-3xl font-extrabold text-black">R$ 0.00</span>
+                </div>
+            </div>
+
+            <!-- Entradas Previstas por Período -->
+            <div class="mt-8">
+                <h3 class="text-2xl font-bold text-white mb-4 border-b border-gray-600 pb-2">Entradas Previstas por Período</h3>
+                <div id="entradas-previstas-por-periodo" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-left">
+                    <div class="bg-white p-3 rounded-lg shadow-sm flex justify-between items-center text-sm">
+                        <span class="font-medium text-gray-800">Dias 1 - 5:</span>
+                        <span id="previstas-1-5" class="font-bold text-black">R$ 0.00</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm flex justify-between items-center text-sm">
+                        <span class="font-medium text-gray-800">Dias 6 - 10:</span>
+                        <span id="previstas-6-10" class="font-bold text-black">R$ 0.00</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm flex justify-between items-center text-sm">
+                        <span class="font-medium text-gray-800">Dias 11 - 15:</span>
+                        <span id="previstas-11-15" class="font-bold text-black">R$ 0.00</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm flex justify-between items-center text-sm">
+                        <span class="font-medium text-gray-800">Dias 16 - 20:</span>
+                        <span id="previstas-16-20" class="font-bold text-black">R$ 0.00</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm flex justify-between items-center text-sm">
+                        <span class="font-medium text-gray-800">Dias 21 - 31:</span>
+                        <span id="previstas-21-31" class="font-bold text-black">R$ 0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Entradas Recebidas por Período -->
+            <div class="mt-8">
+                <h3 class="text-2xl font-bold text-white mb-4 border-b border-gray-600 pb-2">Entradas Recebidas por Período</h3>
+                <div id="entradas-recebidas-por-periodo" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-left">
+                    <div class="bg-white p-3 rounded-lg shadow-sm flex justify-between items-center text-sm">
+                        <span class="font-medium text-gray-800">Dias 1 - 5:</span>
+                        <span id="recebidas-1-5" class="font-bold text-black">R$ 0.00</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm flex justify-between items-center text-sm">
+                        <span class="font-medium text-gray-800">Dias 6 - 10:</span>
+                        <span id="recebidas-6-10" class="font-bold text-black">R$ 0.00</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm flex justify-between items-center text-sm">
+                        <span class="font-medium text-gray-800">Dias 11 - 15:</span>
+                        <span id="recebidas-11-15" class="font-bold text-black">R$ 0.00</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm flex justify-between items-center text-sm">
+                        <span class="font-medium text-gray-800">Dias 16 - 20:</span>
+                        <span id="recebidas-16-20" class="font-bold text-black">R$ 0.00</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm flex justify-between items-center text-sm">
+                        <span class="font-medium text-gray-800">Dias 21 - 31:</span>
+                        <span id="recebidas-21-31" class="font-bold text-black">R$ 0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Entradas por Categoria -->
+            <div class="mt-8">
+                <h3 class="text-2xl font-bold text-white mb-4 border-b border-gray-600 pb-2">Entradas por Categoria</h3>
+                <div id="entradas-por-categoria" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                    <!-- Conteúdo populado por JS -->
+                </div>
+            </div>
+
+            <!-- Saídas por Categoria -->
+            <div class="mt-8">
+                <h3 class="text-2xl font-bold text-white mb-4 border-b border-gray-600 pb-2">Saídas por Categoria</h3>
+                <div id="saidas-por-categoria" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                    <!-- Conteúdo populado por JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção de Recebimentos Atrasados -->
+        <div class="mb-10 p-6 bg-gray-100 rounded-xl shadow-inner border border-gray-200">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 border-b-2 border-red-500 pb-2">Recebimentos Atrasados</h2>
+            <ul id="overdue-receipts-list" class="list-disc pl-5 text-gray-700">
+                <!-- Itens serão populados por JS -->
+                <li class="text-gray-500">Nenhum recebimento atrasado.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Caixa de Mensagem para notificações -->
+    <div id="message-box" class="hidden"></div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div id="confirm-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <p class="text-lg font-semibold text-gray-800">Tem certeza que deseja remover esta linha?</p>
+            <div class="modal-buttons">
+                <button id="confirm-delete-btn" class="btn-base bg-red-600 text-white hover:bg-red-700 px-6 py-2">Confirmar</button>
+                <button id="cancel-delete-btn" class="btn-base bg-gray-700 text-white hover:bg-black px-6 py-2">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Obter referências aos elementos DOM
+        const acertosTableBody = document.getElementById('acertos-table-body');
+        const addRowBtn = document.getElementById('add-row-btn');
+        const saveDataBtn = document.getElementById('save-data-btn');
+        const exportCsvBtn = document.getElementById('export-csv-btn');
+        const importCsvInput = document.getElementById('import-csv-input');
+        const importCsvBtn = document.getElementById('import-csv-btn');
+        const undoBtn = document.getElementById('undo-btn');
+        const redoBtn = document.getElementById('redo-btn');
+
+        const totalEntradasSpan = document.getElementById('total-entradas');
+        const totalSaidasSpan = document.getElementById('total-saidas');
+        const saldoCaixaSpan = document.getElementById('saldo-caixa');
+        const messageBox = document.getElementById('message-box');
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const currentDatetimeSpan = document.getElementById('current-datetime');
+
+        // Elementos de filtro e pesquisa
+        const searchInput = document.getElementById('search-input');
+        const filterCategorySelect = document.getElementById('filter-category');
+        const filterTypeSelect = document.getElementById('filter-type');
+        const filterRecorrenteSelect = document.getElementById('filter-recorrente');
+        const filterConciliadoSelect = document.getElementById('filter-conciliado');
+        const filterMonthSelect = document.getElementById('filter-month');
+        const filterYearSelect = document.getElementById('filter-year');
+        const filterStartDateInput = document.getElementById('filter-start-date');
+        const filterEndDateInput = document.getElementById('filter-end-date');
+
+        // Elementos de gerenciamento de categorias
+        const newCategoryInput = document.getElementById('new-category-input');
+        const addCategoryBtn = document.getElementById('add-category-btn');
+        const removeCategoryBtn = document.getElementById('remove-category-btn');
+        const selectCategoryToRemove = document.getElementById('select-category-to-remove');
+
+        // Elementos do Modal de Confirmação
+        const confirmModal = document.getElementById('confirm-modal');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+        let rowToDelete = null;
+
+        // Elementos de Orçamento Mensal
+        const monthlyBudgetInput = document.getElementById('monthly-budget-input');
+        const budgetTotalSaidasSpan = document.getElementById('budget-total-saidas');
+        const budgetRemainingSpan = document.getElementById('budget-remaining');
+
+        // Elemento da lista de recebimentos atrasados
+        const overdueReceiptsList = document.getElementById('overdue-receipts-list');
+
+        // Elementos para Entradas/Saídas por Categoria
+        const entradasPorCategoriaDiv = document.getElementById('entradas-por-categoria');
+        const saidasPorCategoriaDiv = document.getElementById('saidas-por-categoria');
+
+        // Elementos para Entradas Recebidas e Previstas
+        const totalEntradasRecebidasSpan = document.getElementById('total-entradas-recebidas');
+        const totalEntradasPrevistasSpan = document.getElementById('total-entradas-previstas');
+        const visibleRowCountSpan = document.getElementById('visible-row-count');
+
+        // Elementos para Entradas Previstas por Período
+        const previstas1_5Span = document.getElementById('previstas-1-5');
+        const previstas6_10Span = document.getElementById('previstas-6-10');
+        const previstas11_15Span = document.getElementById('previstas-11-15');
+        const previstas16_20Span = document.getElementById('previstas-16-20');
+        const previstas21_31Span = document.getElementById('previstas-21-31');
+
+        // Elementos para Entradas Recebidas por Período
+        const recebidas1_5Span = document.getElementById('recebidas-1-5');
+        const recebidas6_10Span = document.getElementById('recebidas-6-10');
+        const recebidas11_15Span = document.getElementById('recebidas-11-15');
+        const recebidas16_20Span = document.getElementById('recebidas-16-20');
+        const recebidas21_31Span = document.getElementById('recebidas-21-31');
+
+
+        // Definir categorias padrão para o dropdown (podem ser estendidas ou personalizadas)
+        let categories = [
+            'RECEITAS - Venda de Produto',
+            'RECEITAS - Prestação de Serviço',
+            'RECEITAS - Aluguel Recebido',
+            'RECEITAS - Investimento',
+            'RECEITAS - Outras Receitas',
+            'DESPESAS FIXAS - Aluguel',
+            'DESPESAS FIXAS - Salários',
+            'DESPESAS FIXAS - Contas de Consumo (Água, Luz, Internet)',
+            'DESPESAS FIXAS - Assinaturas',
+            'DESPESAS VARIÁVEIS - Matéria-Prima',
+            'DESPESAS VARIÁVEIS - Comissão de Vendas',
+            'DESPESAS VARIÁVEIS - Frete',
+            'DESPESAS VARIÁVEIS - Manutenção',
+            'DESPESAS OPERACIONAIS - Marketing',
+            'DESPESAS OPERACIONAIS - Viagens',
+            'DESPESAS OPERACIONAIS - Material de Escritório',
+            'DESPESAS OPERACIONAIS - Treinamento',
+            'INVESTIMENTOS - Ações',
+            'INVESTIMENTOS - Fundos',
+            'INVESTIMENTOS - Imóveis',
+            'OUTROS - Reembolso',
+            'OUTROS - Doação',
+            'OUTROS - Impostos',
+            'STATUS - Pago',
+            'STATUS - Pendente',
+            'STATUS - Atrasado',
+            'MÉTODO DE PAGAMENTO - Cartão de Crédito',
+            'MÉTODO DE PAGAMENTO - Boleto',
+            'MÉTODO DE PAGAMENTO - PIX',
+            'MÉTODO DE PAGAMENTO - Dinheiro',
+            'CENTRO DE CUSTO - Marketing',
+            'CENTRO DE CUSTO - Vendas',
+            'CENTRO DE CUSTO - Operações',
+            'CENTRO DE CUSTO - Administrativo'
+        ];
+
+        // Definir tipos para o novo dropdown 'Tipo'
+        const types = ['ENTRADA', 'SAÍDA'];
+
+        const LOCAL_STORAGE_KEY_DATA = 'planilhaAcertosData';
+        const LOCAL_STORAGE_KEY_CATEGORIES = 'planilhaCategories';
+        const LOCAL_STORAGE_KEY_DARK_MODE = 'darkModeEnabled';
+        const LOCAL_STORAGE_KEY_BUDGET = 'monthlyBudget';
+        const LOCAL_STORAGE_KEY_COLUMN_WIDTHS = 'columnWidths';
+
+        let currentSortColumn = null;
+        let currentSortDirection = 'asc';
+        let uniqueNames = new Set();
+
+        // Histórico para Desfazer/Refazer
+        let history = [];
+        let historyPointer = -1;
+        const MAX_HISTORY_SIZE = 20;
+
+        // Variáveis para redimensionamento de colunas
+        let isResizing = false;
+        let currentResizer = null;
+        let startX = 0;
+        let startWidth = 0;
+        let currentTh = null;
+
+        /**
+         * Adiciona o estado atual dos dados ao histórico.
+         */
+        function pushStateToHistory() {
+            const currentData = getCurrentTableData();
+            if (historyPointer < history.length - 1) {
+                history = history.slice(0, historyPointer + 1);
+            }
+
+            history.push(currentData);
+            if (history.length > MAX_HISTORY_SIZE) {
+                history.shift();
+            } else {
+                historyPointer++;
+            }
+            updateUndoRedoButtons();
+        }
+
+        /**
+         * Retorna o estado atual dos dados da tabela como um array de objetos.
+         */
+        function getCurrentTableData() {
+            const rows = acertosTableBody.querySelectorAll('tr');
+            const data = [];
+            rows.forEach(row => {
+                const nameInput = row.querySelector('td:nth-child(1) input');
+                const valorMensalInput = row.querySelector('td:nth-child(2) input');
+                const dateInput = row.querySelector('td:nth-child(3) input');
+                const categorySelect = row.querySelector('td:nth-child(4) select');
+                const typeSelect = row.querySelector('td:nth-child(5) select');
+                const recorrenteCheckbox = row.querySelector('td:nth-child(6) input[type="checkbox"]');
+                const conciliadoCheckbox = row.querySelector('td:nth-child(7) input[type="checkbox"]');
+
+                data.push({
+                    name: nameInput ? nameInput.value : '',
+                    valorMensal: valorMensalInput ? parseFloat(valorMensalInput.value) || 0 : 0,
+                    date: dateInput ? dateInput.value : '',
+                    category: categorySelect ? categorySelect.value : '',
+                    type: typeSelect ? typeSelect.value : '',
+                    recorrente: recorrenteCheckbox ? recorrenteCheckbox.checked : false,
+                    conciliado: conciliadoCheckbox ? conciliadoCheckbox.checked : false
+                });
+            });
+            return data;
+        }
+
+        /**
+         * Carrega um estado específico do histórico na tabela.
+         * @param {Array} data - O array de dados a ser carregado.
+         */
+        function loadStateFromHistory(data) {
+            acertosTableBody.innerHTML = '';
+            data.forEach(rowData => {
+                const newRow = createNewRow(rowData);
+                acertosTableBody.appendChild(newRow);
+            });
+            updateTotal();
+            updateNameDatalist();
+            refreshAllCategoryDropdowns();
+            applyFiltersAndSearch();
+        }
+
+        /**
+         * Desfaz a última ação.
+         */
+        function undo() {
+            if (historyPointer > 0) {
+                historyPointer--;
+                loadStateFromHistory(history[historyPointer]);
+                showMessage('Ação desfeita!', 'success');
+            }
+            updateUndoRedoButtons();
+        }
+
+        /**
+         * Refaz a última ação desfeita.
+         */
+        function redo() {
+            if (historyPointer < history.length - 1) {
+                historyPointer++;
+                loadStateFromHistory(history[historyPointer]);
+                showMessage('Ação refeita!', 'success');
+            }
+            updateUndoRedoButtons();
+        }
+
+        /**
+         * Atualiza o estado dos botões Desfazer/Refazer.
+         */
+        function updateUndoRedoButtons() {
+            undoBtn.disabled = historyPointer <= 0;
+            redoBtn.disabled = historyPointer >= history.length - 1;
+        }
+
+
+        /**
+         * Exibe uma mensagem temporária na caixa de mensagem.
+         * @param {string} message - A mensagem a ser exibida.
+         * @param {string} type - 'success' ou 'error' para mudar a cor de fundo.
+         */
+        function showMessage(message, type = 'success') {
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden', 'bg-red-500', 'bg-green-600', 'error', 'success');
+            if (type === 'success') {
+                messageBox.classList.add('bg-red-500', 'success');
+            } else {
+                messageBox.classList.add('bg-red-700', 'error');
+            }
+            messageBox.classList.add('show');
+
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+                setTimeout(() => {
+                    messageBox.classList.add('hidden');
+                }, 500);
+            }, 3000);
+        }
+
+        /**
+         * Cria uma nova linha da tabela com campos de entrada e dropdowns.
+         * @param {Object} [data={}] - Dados opcionais para preencher a linha.
+         * @returns {HTMLTableRowElement} A nova linha da tabela.
+         */
+        function createNewRow(data = {}) {
+            const row = document.createElement('tr');
+            row.classList.add('even:bg-gray-100', 'odd:bg-white', 'hover:bg-gray-200');
+
+            // Célula de entrada de Nome
+            const nameCell = document.createElement('td');
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.classList.add('table-input');
+            nameInput.placeholder = 'Nome';
+            nameInput.value = data.name || '';
+            nameInput.setAttribute('list', 'name-suggestions');
+            nameInput.addEventListener('input', () => {
+                if (nameInput.value.trim() !== '') {
+                    uniqueNames.add(nameInput.value.trim());
+                }
+                saveDataAndApplyFilters();
+            });
+            nameCell.appendChild(nameInput);
+            row.appendChild(nameCell);
+
+            // Célula de entrada de Valor Mensal
+            const valorMensalCell = document.createElement('td');
+            const valorMensalInput = document.createElement('input');
+            valorMensalInput.type = 'number';
+            valorMensalInput.classList.add('table-input', 'valor-mensal');
+            valorMensalInput.step = '0.01';
+            valorMensalInput.value = data.valorMensal !== undefined ? parseFloat(data.valorMensal).toFixed(2) : '0.00';
+            valorMensalInput.placeholder = '0.00';
+            valorMensalInput.addEventListener('input', (event) => {
+                if (isNaN(parseFloat(event.target.value))) {
+                    event.target.style.borderColor = '#ef4444';
+                    showMessage('Valor Mensal deve ser um número válido.', 'error');
+                } else {
+                    event.target.style.borderColor = '';
+                }
+                saveDataAndApplyFilters();
+            });
+            valorMensalCell.appendChild(valorMensalInput);
+            row.appendChild(valorMensalCell);
+
+            // Célula de entrada de Data
+            const dateCell = document.createElement('td');
+            const dateInput = document.createElement('input');
+            dateInput.type = 'date';
+            dateInput.classList.add('table-input');
+            dateInput.value = data.date || new Date().toISOString().split('T')[0];
+            dateInput.addEventListener('input', saveDataAndApplyFilters);
+            dateCell.appendChild(dateInput);
+            row.appendChild(dateCell);
+
+            // Célula de dropdown de seleção de Categoria
+            const categoryCell = document.createElement('td');
+            const categorySelect = document.createElement('select');
+            categorySelect.classList.add('table-select', 'categoria-select');
+            populateCategoryDropdown(categorySelect);
+            categorySelect.value = data.category || categories[0];
+            categorySelect.addEventListener('change', () => {
+                applyRowStatusStyles(row, categorySelect.value);
+                saveDataAndApplyFilters();
+            });
+            categoryCell.appendChild(categorySelect);
+            row.appendChild(categoryCell);
+
+            // Célula de dropdown de seleção de Tipo (Entrada/Saída)
+            const typeCell = document.createElement('td');
+            const typeSelect = document.createElement('select');
+            typeSelect.classList.add('table-select', 'tipo-select');
+            types.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                typeSelect.appendChild(option);
+            });
+            typeSelect.value = data.type || types[0];
+            typeSelect.addEventListener('change', saveDataAndApplyFilters);
+            typeCell.appendChild(typeSelect);
+            row.appendChild(typeCell);
+
+            // Nova: Célula de Recorrente (Checkbox)
+            const recorrenteCell = document.createElement('td');
+            const recorrenteCheckbox = document.createElement('input');
+            recorrenteCheckbox.type = 'checkbox';
+            recorrenteCheckbox.classList.add('form-checkbox', 'h-5', 'w-5', 'text-red-600', 'rounded', 'border-gray-300', 'focus:ring-red-500');
+            recorrenteCheckbox.checked = data.recorrente || false;
+            recorrenteCheckbox.addEventListener('change', () => {
+                row.classList.toggle('recorrente-row', recorrenteCheckbox.checked);
+                saveDataAndApplyFilters();
+            });
+            recorrenteCell.appendChild(recorrenteCheckbox);
+            recorrenteCell.classList.add('text-center');
+            row.appendChild(recorrenteCell);
+
+            // Célula de Conciliado (Checkbox)
+            const conciliadoCell = document.createElement('td');
+            const conciliadoCheckbox = document.createElement('input');
+            conciliadoCheckbox.type = 'checkbox';
+            conciliadoCheckbox.classList.add('form-checkbox', 'h-5', 'w-5', 'text-red-600', 'rounded', 'border-gray-300', 'focus:ring-red-500');
+            conciliadoCheckbox.checked = data.conciliado || false;
+            conciliadoCheckbox.addEventListener('change', saveDataAndApplyFilters);
+            conciliadoCell.appendChild(conciliadoCheckbox);
+            conciliadoCell.classList.add('text-center');
+            row.appendChild(conciliadoCell);
+
+            // Célula de Ações (botão de remover)
+            const actionsCell = document.createElement('td');
+            const removeButton = document.createElement('button');
+            removeButton.classList.add('remove-row-btn');
+            removeButton.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zm-1 3a1 1 0 011-1h4a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 000 2h4a1 1 0 100-2H7z" clip-rule="evenodd" />
+                </svg>
+            `;
+            removeButton.title = 'Remover linha';
+            removeButton.addEventListener('click', () => {
+                showConfirmModal(row);
+            });
+            actionsCell.appendChild(removeButton);
+            row.appendChild(actionsCell);
+
+            // Aplicar estilos de status e recorrente ao criar a linha
+            applyRowStatusStyles(row, data.category);
+            row.classList.toggle('recorrente-row', data.recorrente || false);
+            applyOverdueReceiptStyle(row);
+
+            return row;
+        }
+
+        /**
+         * Aplica estilos de cor à linha com base na categoria de status.
+         * @param {HTMLTableRowElement} row - A linha da tabela.
+         * @param {string} category - A categoria da linha.
+         */
+        function applyRowStatusStyles(row, category) {
+            row.classList.remove('status-pago', 'status-atrasado');
+            if (category === 'STATUS - Pago') {
+                row.classList.add('status-pago');
+            } else if (category === 'STATUS - Atrasado') {
+                row.classList.add('status-atrasado');
+            }
+        }
+
+        /**
+         * Aplica estilo de destaque se for um recebimento atrasado.
+         * @param {HTMLTableRowElement} row - A linha da tabela.
+         */
+        function applyOverdueReceiptStyle(row) {
+            row.classList.remove('overdue-receipt-row');
+
+            const type = row.querySelector('td:nth-child(5) select').value;
+            const category = row.querySelector('td:nth-child(4) select').value;
+            const dateInput = row.querySelector('td:nth-child(3) input');
+            const rowDate = dateInput ? new Date(dateInput.value + 'T12:00:00') : null;
+            const conciliadoCheckbox = row.querySelector('td:nth-child(7) input[type="checkbox"]');
+            const conciliado = conciliadoCheckbox ? conciliadoCheckbox.checked : false;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (type === 'ENTRADA' && rowDate && rowDate < today && category !== 'STATUS - Pago' && !conciliado) {
+                row.classList.add('overdue-receipt-row');
+            }
+        }
+
+
+        /**
+         * Popula um dropdown de categoria com as categorias atuais.
+         * @param {HTMLSelectElement} selectElement - O elemento <select> a ser populado.
+         * @param {boolean} includeAllOption - Se deve incluir a opção "Todas as Categorias".
+         */
+        function populateCategoryDropdown(selectElement, includeAllOption = false) {
+            selectElement.innerHTML = '';
+            if (includeAllOption) {
+                const allOption = document.createElement('option');
+                allOption.value = '';
+                allOption.textContent = 'Todas as Categorias';
+                selectElement.appendChild(allOption);
+            }
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                selectElement.appendChild(option);
+            });
+        }
+
+        /**
+         * Recarrega todos os dropdowns de categoria na página.
+         */
+        function refreshAllCategoryDropdowns() {
+            document.querySelectorAll('.categoria-select').forEach(select => {
+                const selectedValue = select.value;
+                populateCategoryDropdown(select);
+                select.value = selectedValue;
+            });
+            const selectedFilterCategory = filterCategorySelect.value;
+            populateCategoryDropdown(filterCategorySelect, true);
+            filterCategorySelect.value = selectedFilterCategory;
+            const selectedRemoveCategory = selectCategoryToRemove.value;
+            populateCategoryDropdown(selectCategoryToRemove, false);
+            selectCategoryToRemove.value = selectedRemoveCategory;
+        }
+
+        /**
+         * Adiciona uma nova categoria à lista.
+         */
+        function addCategory() {
+            const newCat = newCategoryInput.value.trim();
+            if (newCat && !categories.includes(newCat)) {
+                categories.push(newCat);
+                categories.sort();
+                newCategoryInput.value = '';
+                saveCategories();
+                refreshAllCategoryDropdowns();
+                showMessage(`Categoria "${newCat}" adicionada!`, 'success');
+            } else if (newCat && categories.includes(newCat)) {
+                showMessage(`A categoria "${newCat}" já existe.`, 'error');
+            } else {
+                showMessage('Por favor, digite um nome para a categoria.', 'error');
+            }
+        }
+
+        /**
+         * Remove uma categoria da lista.
+         */
+        function removeCategory() {
+            const catToRemove = selectCategoryToRemove.value;
+            if (catToRemove && categories.includes(catToRemove)) {
+                const rowsUsingCategory = Array.from(acertosTableBody.querySelectorAll('tr')).some(row => {
+                    return row.querySelector('.categoria-select').value === catToRemove;
+                });
+
+                if (rowsUsingCategory) {
+                    showMessage('Não é possível remover a categoria. Existem linhas da planilha usando-a.', 'error');
+                    return;
+                }
+
+                categories = categories.filter(cat => cat !== catToRemove);
+                saveCategories();
+                refreshAllCategoryDropdowns();
+                showMessage(`Categoria "${catToRemove}" removida!`, 'success');
+            } else {
+                showMessage('Por favor, selecione uma categoria para remover.', 'error');
+            }
+        }
+
+        /**
+         * Calcula o saldo total (Entradas - Saídas) e atualiza a exibição.
+         * Também atualiza a lista de recebimentos atrasados e os totais por categoria.
+         * Separa Entradas Recebidas e Previstas.
+         * Atualiza o contador de linhas visíveis.
+         */
+        function updateTotal() {
+            let totalEntradas = 0;
+            let totalSaidas = 0;
+            let saldoCaixa = 0;
+            let totalEntradasRecebidas = 0;
+            let totalEntradasPrevistas = 0;
+            let overdueReceipts = [];
+            let categoryTotals = { entradas: {}, saidas: {} };
+            let entradasPrevistasPorPeriodo = {
+                '1-5': 0,
+                '6-10': 0,
+                '11-15': 0,
+                '16-20': 0,
+                '21-31': 0
+            };
+            let entradasRecebidasPorPeriodo = {
+                '1-5': 0,
+                '6-10': 0,
+                '11-15': 0,
+                '16-20': 0,
+                '21-31': 0
+            };
+            let visibleRowsCount = 0;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const allRows = Array.from(acertosTableBody.children);
+
+            allRows.forEach(row => {
+                if (!row.classList.contains('hidden')) {
+                    visibleRowsCount++;
+                }
+                applyOverdueReceiptStyle(row);
+            });
+
+            const visibleRows = allRows.filter(row => !row.classList.contains('hidden'));
+
+            visibleRows.forEach(row => {
+                const valorMensalInput = row.querySelector('td:nth-child(2) input');
+                const typeSelect = row.querySelector('td:nth-child(5) select');
+                const categorySelect = row.querySelector('td:nth-child(4) select');
+                const dateInput = row.querySelector('td:nth-child(3) input');
+                const conciliadoCheckbox = row.querySelector('td:nth-child(7) input[type="checkbox"]');
+
+                const value = parseFloat(valorMensalInput.value) || 0;
+                const type = typeSelect.value;
+                const category = categorySelect.value;
+                const dateString = dateInput.value;
+                const rowDate = dateString ? new Date(dateString + 'T12:00:00') : null;
+                const conciliado = conciliadoCheckbox ? conciliadoCheckbox.checked : false;
+
+
+                if (type === 'ENTRADA') {
+                    totalEntradas += value;
+                    categoryTotals.entradas[category] = (categoryTotals.entradas[category] || 0) + value;
+
+                    // Lógica para Entradas Recebidas: Apenas se for ENTRADA e CONCILIADO (sem verificação de data)
+                    if (conciliado) {
+                        totalEntradasRecebidas += value;
+                        const dayOfMonth = rowDate ? rowDate.getDate() : 0; // Usar 0 se a data for nula
+                        if (dayOfMonth >= 1 && dayOfMonth <= 5) {
+                            entradasRecebidasPorPeriodo['1-5'] += value;
+                        } else if (dayOfMonth >= 6 && dayOfMonth <= 10) {
+                            entradasRecebidasPorPeriodo['6-10'] += value;
+                        } else if (dayOfMonth >= 11 && dayOfMonth <= 15) {
+                            entradasRecebidasPorPeriodo['11-15'] += value;
+                        } else if (dayOfMonth >= 16 && dayOfMonth <= 20) {
+                            entradasRecebidasPorPeriodo['16-20'] += value;
+                        } else if (dayOfMonth >= 21 && dayOfMonth <= 31) {
+                            entradasRecebidasPorPeriodo['21-31'] += value;
+                        }
+                    }
+
+                    // Lógica para Entradas Previstas: Apenas se for ENTRADA e data futura E NÃO CONCILIADO
+                    if (rowDate && rowDate > today && !conciliado) {
+                        totalEntradasPrevistas += value;
+                        const dayOfMonth = rowDate.getDate();
+                        if (dayOfMonth >= 1 && dayOfMonth <= 5) {
+                            entradasPrevistasPorPeriodo['1-5'] += value;
+                        } else if (dayOfMonth >= 6 && dayOfMonth <= 10) {
+                            entradasPrevistasPorPeriodo['6-10'] += value;
+                        } else if (dayOfMonth >= 11 && dayOfMonth <= 15) {
+                            entradasPrevistasPorPeriodo['11-15'] += value;
+                        } else if (dayOfMonth >= 16 && dayOfMonth <= 20) {
+                            entradasPrevistasPorPeriodo['16-20'] += value;
+                        } else if (dayOfMonth >= 21 && dayOfMonth <= 31) {
+                            entradasPrevistasPorPeriodo['21-31'] += value;
+                        }
+                    }
+                } else if (type === 'SAÍDA') {
+                    totalSaidas += value;
+                    categoryTotals.saidas[category] = (categoryTotals.saidas[category] || 0) + value;
+                }
+
+                // Lógica para Recebimentos Atrasados (permanece a mesma): ENTRADA, data passada, NÃO PAGO e NÃO CONCILIADO
+                if (type === 'ENTRADA' && rowDate && rowDate < today && category !== 'STATUS - Pago' && !conciliado) {
+                    overdueReceipts.push({
+                        name: row.querySelector('td:nth-child(1) input').value,
+                        valor: value,
+                        date: dateString
+                    });
+                }
+            });
+
+            saldoCaixa = totalEntradas - totalSaidas;
+
+            totalEntradasSpan.textContent = `R$ ${totalEntradas.toFixed(2)}`;
+            totalSaidasSpan.textContent = `R$ ${totalSaidas.toFixed(2)}`;
+            saldoCaixaSpan.textContent = `R$ ${saldoCaixa.toFixed(2)}`;
+            totalEntradasRecebidasSpan.textContent = `R$ ${totalEntradasRecebidas.toFixed(2)}`;
+            totalEntradasPrevistasSpan.textContent = `R$ ${totalEntradasPrevistas.toFixed(2)}`;
+            visibleRowCountSpan.textContent = visibleRowsCount;
+
+            // Atualizar spans de entradas previstas por período
+            previstas1_5Span.textContent = `R$ ${entradasPrevistasPorPeriodo['1-5'].toFixed(2)}`;
+            previstas6_10Span.textContent = `R$ ${entradasPrevistasPorPeriodo['6-10'].toFixed(2)}`;
+            previstas11_15Span.textContent = `R$ ${entradasPrevistasPorPeriodo['11-15'].toFixed(2)}`;
+            previstas16_20Span.textContent = `R$ ${entradasPrevistasPorPeriodo['16-20'].toFixed(2)}`;
+            previstas21_31Span.textContent = `R$ ${entradasPrevistasPorPeriodo['21-31'].toFixed(2)}`;
+
+            // Atualizar spans de entradas recebidas por período
+            recebidas1_5Span.textContent = `R$ ${entradasRecebidasPorPeriodo['1-5'].toFixed(2)}`;
+            recebidas6_10Span.textContent = `R$ ${entradasRecebidasPorPeriodo['6-10'].toFixed(2)}`;
+            recebidas11_15Span.textContent = `R$ ${entradasRecebidasPorPeriodo['11-15'].toFixed(2)}`;
+            recebidas16_20Span.textContent = `R$ ${entradasRecebidasPorPeriodo['16-20'].toFixed(2)}`;
+            recebidas21_31Span.textContent = `R$ ${entradasRecebidasPorPeriodo['21-31'].toFixed(2)}`;
+
+
+            if (saldoCaixa < 0) {
+                saldoCaixaSpan.classList.remove('text-black');
+                saldoCaixaSpan.classList.add('text-red-600');
+            } else {
+                saldoCaixaSpan.classList.remove('text-red-600');
+                saldoCaixaSpan.classList.add('text-black');
+            }
+
+            const monthlyBudget = parseFloat(monthlyBudgetInput.value) || 0;
+            const budgetRemaining = monthlyBudget - totalSaidas;
+            budgetTotalSaidasSpan.textContent = `R$ ${totalSaidas.toFixed(2)}`;
+            budgetRemainingSpan.textContent = `R$ ${budgetRemaining.toFixed(2)}`;
+            if (budgetRemaining < 0) {
+                budgetRemainingSpan.classList.remove('text-black');
+                budgetRemainingSpan.classList.add('text-red-600');
+                showMessage('Orçamento excedido!', 'error');
+            } else {
+                budgetRemainingSpan.classList.remove('text-red-600');
+                budgetRemainingSpan.classList.add('text-black');
+            }
+
+            overdueReceiptsList.innerHTML = '';
+            if (overdueReceipts.length > 0) {
+                overdueReceipts.forEach(receipt => {
+                    const li = document.createElement('li');
+                    li.textContent = `${receipt.name}: R$ ${receipt.valor.toFixed(2)} (Vencimento: ${receipt.date})`;
+                    li.classList.add('text-red-600', 'font-semibold', 'mb-1');
+                    overdueReceiptsList.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.textContent = 'Nenhum recebimento atrasado.';
+                li.classList.add('text-gray-500');
+                overdueReceiptsList.appendChild(li);
+            }
+
+            displayCategorizedTotals(categoryTotals);
+        }
+
+        /**
+         * Exibe os totais de entradas e saídas por categoria.
+         * @param {Object} categoryTotals - Objeto contendo os totais por categoria.
+         */
+        function displayCategorizedTotals(categoryTotals) {
+            entradasPorCategoriaDiv.innerHTML = '';
+            saidasPorCategoriaDiv.innerHTML = '';
+
+            const sortedEntradas = Object.entries(categoryTotals.entradas).sort(([,a],[,b]) => b - a);
+            const sortedSaidas = Object.entries(categoryTotals.saidas).sort(([,a],[,b]) => b - a);
+
+            if (sortedEntradas.length > 0) {
+                sortedEntradas.forEach(([category, total]) => {
+                    const div = document.createElement('div');
+                    div.classList.add('bg-white', 'p-3', 'rounded-lg', 'shadow-sm', 'flex', 'justify-between', 'items-center', 'text-sm');
+                    div.innerHTML = `
+                        <span class="font-medium text-gray-800">${category}:</span>
+                        <span class="font-bold text-black">R$ ${total.toFixed(2)}</span>
+                    `;
+                    entradasPorCategoriaDiv.appendChild(div);
+                });
+            } else {
+                entradasPorCategoriaDiv.innerHTML = '<p class="text-gray-500">Nenhuma entrada visível por categoria.</p>';
+            }
+
+            if (sortedSaidas.length > 0) {
+                sortedSaidas.forEach(([category, total]) => {
+                    const div = document.createElement('div');
+                    div.classList.add('bg-white', 'p-3', 'rounded-lg', 'shadow-sm', 'flex', 'justify-between', 'items-center', 'text-sm');
+                    div.innerHTML = `
+                        <span class="font-medium text-gray-800">${category}:</span>
+                        <span class="font-bold text-red-600">R$ ${total.toFixed(2)}</span>
+                    `;
+                    saidasPorCategoriaDiv.appendChild(div);
+                });
+            } else {
+                saidasPorCategoriaDiv.innerHTML = '<p class="text-gray-500">Nenhuma saída visível por categoria.</p>';
+            }
+        }
+
+
+        /**
+         * Salva todos os dados da tabela, categorias e orçamento no localStorage.
+         */
+        function saveData() {
+            const rows = acertosTableBody.querySelectorAll('tr');
+            const dataToSave = [];
+            uniqueNames.clear();
+            rows.forEach(row => {
+                const nameInput = row.querySelector('td:nth-child(1) input');
+                const valorMensalInput = row.querySelector('td:nth-child(2) input');
+                const dateInput = row.querySelector('td:nth-child(3) input');
+                const categorySelect = row.querySelector('td:nth-child(4) select');
+                const typeSelect = row.querySelector('td:nth-child(5) select');
+                const recorrenteCheckbox = row.querySelector('td:nth-child(6) input[type="checkbox"]');
+                const conciliadoCheckbox = row.querySelector('td:nth-child(7) input[type="checkbox"]');
+
+                const nameValue = nameInput ? nameInput.value.trim() : '';
+                if (nameValue !== '') {
+                    uniqueNames.add(nameValue);
+                }
+
+                dataToSave.push({
+                    name: nameValue,
+                    valorMensal: valorMensalInput ? parseFloat(valorMensalInput.value) || 0 : 0,
+                    date: dateInput ? dateInput.value : '',
+                    category: categorySelect ? categorySelect.value : '',
+                    type: typeSelect ? typeSelect.value : '',
+                    recorrente: recorrenteCheckbox ? recorrenteCheckbox.checked : false,
+                    conciliado: conciliadoCheckbox ? conciliadoCheckbox.checked : false
+                });
+            });
+            try {
+                localStorage.setItem(LOCAL_STORAGE_KEY_DATA, JSON.stringify(dataToSave));
+                localStorage.setItem('uniqueNames', JSON.stringify(Array.from(uniqueNames)));
+                localStorage.setItem(LOCAL_STORAGE_KEY_BUDGET, monthlyBudgetInput.value);
+            } catch (e) {
+                showMessage('Erro ao salvar dados automaticamente: ' + e.message, 'error');
+                console.error("Erro ao salvar dados no localStorage:", e);
+            }
+            updateNameDatalist();
+            // pushStateToHistory(); // Chamado apenas após mouseup para redimensionamento
+        }
+
+        /**
+         * Salva as categorias atuais no localStorage.
+         */
+        function saveCategories() {
+            try {
+                localStorage.setItem(LOCAL_STORAGE_KEY_CATEGORIES, JSON.stringify(categories));
+            }
+            catch (e) {
+                showMessage('Erro ao salvar categorias: ' + e.message, 'error');
+                console.error("Erro ao salvar categorias no localStorage:", e);
+            }
+        }
+
+        /**
+         * Carrega dados do localStorage e popula a tabela e categorias.
+         */
+        function loadData() {
+            try {
+                const savedCategories = localStorage.getItem(LOCAL_STORAGE_KEY_CATEGORIES);
+                if (savedCategories) {
+                    categories = JSON.parse(savedCategories);
+                    categories.sort();
+                }
+
+                const savedUniqueNames = localStorage.getItem('uniqueNames');
+                if (savedUniqueNames) {
+                    uniqueNames = new Set(JSON.parse(savedUniqueNames));
+                }
+
+                const savedBudget = localStorage.getItem(LOCAL_STORAGE_KEY_BUDGET);
+                if (savedBudget) {
+                    monthlyBudgetInput.value = parseFloat(savedBudget).toFixed(2);
+                }
+
+                const savedData = localStorage.getItem(LOCAL_STORAGE_KEY_DATA);
+                if (savedData) {
+                    const parsedData = JSON.parse(savedData);
+                    acertosTableBody.innerHTML = '';
+                    parsedData.forEach(rowData => {
+                        const newRow = createNewRow(rowData);
+                        acertosTableBody.appendChild(newRow);
+                    });
+                    showMessage('Dados carregados com sucesso!', 'success');
+                } else {
+                    acertosTableBody.appendChild(createNewRow());
+                }
+            } catch (e) {
+                showMessage('Erro ao carregar dados: ' + e.message, 'error');
+                console.error("Erro ao carregar dados do localStorage:", e);
+                acertosTableBody.appendChild(createNewRow());
+            }
+            refreshAllCategoryDropdowns();
+            updateNameDatalist();
+            applyFiltersAndSearch();
+            pushStateToHistory();
+            loadColumnWidths();
+        }
+
+        /**
+         * Atualiza o datalist para o campo de nome.
+         */
+        function updateNameDatalist() {
+            let datalist = document.getElementById('name-suggestions');
+            if (!datalist) {
+                datalist = document.createElement('datalist');
+                datalist.id = 'name-suggestions';
+                document.body.appendChild(datalist);
+            }
+            datalist.innerHTML = '';
+            uniqueNames.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                datalist.appendChild(option);
+            });
+        }
+
+        /**
+         * Aplica filtros e pesquisa à tabela.
+         */
+        function applyFiltersAndSearch() {
+            const searchText = searchInput.value.toLowerCase();
+            const filterCategory = filterCategorySelect.value;
+            const filterType = filterTypeSelect.value;
+            const filterRecorrente = filterRecorrenteSelect.value;
+            const filterConciliado = filterConciliadoSelect.value;
+            const filterMonth = filterMonthSelect.value;
+            const filterYear = filterYearSelect.value;
+            const startDate = filterStartDateInput.value ? new Date(filterStartDateInput.value + 'T00:00:00') : null;
+            const endDate = filterEndDateInput.value ? new Date(filterEndDateInput.value + 'T23:59:59') : null;
+
+            Array.from(acertosTableBody.children).forEach(row => {
+                const nameInput = row.querySelector('td:nth-child(1) input');
+                const categorySelect = row.querySelector('td:nth-child(4) select');
+                const typeSelect = row.querySelector('td:nth-child(5) select');
+                const recorrenteCheckbox = row.querySelector('td:nth-child(6) input[type="checkbox"]');
+                const conciliadoCheckbox = row.querySelector('td:nth-child(7) input[type="checkbox"]');
+                const dateInput = row.querySelector('td:nth-child(3) input');
+
+                const name = nameInput ? nameInput.value.toLowerCase() : '';
+                const category = categorySelect ? categorySelect.value : '';
+                const type = typeSelect ? typeSelect.value : '';
+                const recorrente = recorrenteCheckbox ? recorrenteCheckbox.checked : false;
+                const conciliado = conciliadoCheckbox ? conciliadoCheckbox.checked : false;
+                const dateString = dateInput ? dateInput.value : '';
+                const rowDate = dateString ? new Date(dateString + 'T12:00:00') : null;
+
+                let isVisible = true;
+
+                if (searchText && !(name.includes(searchText) || category.toLowerCase().includes(searchText))) {
+                    isVisible = false;
+                }
+                if (filterCategory && category !== filterCategory) {
+                    isVisible = false;
+                }
+                if (filterType && type !== filterType) {
+                    isVisible = false;
+                }
+                if (filterRecorrente === 'Sim' && !recorrente) {
+                    isVisible = false;
+                } else if (filterRecorrente === 'Não' && recorrente) {
+                    isVisible = false;
+                }
+                if (filterConciliado === 'Sim' && !conciliado) {
+                    isVisible = false;
+                } else if (filterConciliado === 'Não' && conciliado) {
+                    isVisible = false;
+                }
+
+                if (filterMonth && rowDate && (rowDate.getMonth() + 1).toString() !== filterMonth) {
+                    isVisible = false;
+                }
+                if (filterYear && rowDate && rowDate.getFullYear().toString() !== filterYear) {
+                    isVisible = false;
+                }
+
+                if (startDate && rowDate && rowDate < startDate) {
+                    isVisible = false;
+                }
+                if (endDate && rowDate && rowDate > endDate) {
+                    isVisible = false;
+                }
+
+                row.classList.toggle('hidden', !isVisible);
+                applyOverdueReceiptStyle(row);
+            });
+            updateTotal();
+        }
+
+        /**
+         * Salva dados e então aplica os filtros e pesquisa.
+         */
+        function saveDataAndApplyFilters() {
+            saveData();
+            applyFiltersAndSearch();
+        }
+
+        /**
+         * Ordena a tabela com base na coluna e direção.
+         * @param {string} column - A coluna pela qual ordenar ('name', 'valorMensal', 'date').
+         */
+        function sortTable(column) {
+            const rows = Array.from(acertosTableBody.children);
+
+            if (currentSortColumn === column) {
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortColumn = column;
+                currentSortDirection = 'asc';
+            }
+
+            document.querySelectorAll('.sortable-header').forEach(header => {
+                header.classList.remove('asc', 'desc');
+            });
+            document.querySelector(`.sortable-header[data-sort-by="${column}"]`).classList.add(currentSortDirection);
+
+
+            rows.sort((a, b) => {
+                let aValue, bValue;
+
+                switch (column) {
+                    case 'name':
+                        aValue = a.querySelector('td:nth-child(1) input').value.toLowerCase();
+                        bValue = b.querySelector('td:nth-child(1) input').value.toLowerCase();
+                        return currentSortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+                    case 'valorMensal':
+                        aValue = parseFloat(a.querySelector('td:nth-child(2) input').value) || 0;
+                        bValue = parseFloat(b.querySelector('td:nth-child(2) input').value) || 0;
+                        return currentSortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+                    case 'date':
+                        aValue = new Date(a.querySelector('td:nth-child(3) input').value + 'T12:00:00');
+                        bValue = new Date(b.querySelector('td:nth-child(3) input').value + 'T12:00:00');
+                        return currentSortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+                    default:
+                        return 0;
+                }
+            });
+
+            rows.forEach(row => acertosTableBody.appendChild(row));
+            pushStateToHistory();
+        }
+
+        /**
+         * Exporta os dados da tabela para um arquivo CSV.
+         */
+        function exportToCsv() {
+            const rows = Array.from(acertosTableBody.querySelectorAll('tr'));
+            let csvContent = "data:text/csv;charset=utf-8,";
+
+            const headers = Array.from(document.querySelectorAll('#acertos-mensais-tab thead th')).map(th => th.textContent.trim().replace(/\s*<svg.*<\/svg>/, ''));
+            csvContent += headers.slice(0, -1).join(';') + '\n';
+
+            rows.forEach(row => {
+                const rowData = [];
+                rowData.push(row.querySelector('td:nth-child(1) input').value); // Nome
+                rowData.push((parseFloat(row.querySelector('td:nth-child(2) input').value) || 0).toFixed(2).replace('.', ',')); // Valor Mensal
+                rowData.push(row.querySelector('td:nth-child(3) input').value); // Data
+                rowData.push(row.querySelector('td:nth-child(4) select').value); // Categoria
+                rowData.push(row.querySelector('td:nth-child(5) select').value); // Tipo
+                rowData.push(row.querySelector('td:nth-child(6) input[type="checkbox"]').checked ? 'Sim' : 'Não'); // Recorrente
+                rowData.push(row.querySelector('td:nth-child(7) input[type="checkbox"]').checked ? 'Sim' : 'Não'); // Conciliado
+
+                csvContent += rowData.join(';') + '\n';
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', 'planilha_acertos.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showMessage('Dados exportados para CSV!', 'success');
+        }
+
+        /**
+         * Importa dados de um arquivo CSV.
+         * @param {Event} event - O evento de mudança do input de arquivo.
+         */
+        function importFromCsv(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const csvText = e.target.result;
+                const lines = csvText.split('\n').filter(line => line.trim() !== '');
+
+                if (lines.length === 0) {
+                    showMessage('O arquivo CSV está vazio.', 'error');
+                    return;
+                }
+
+                const headers = lines[0].split(';');
+                const expectedHeaders = ["NOME", "VALOR MENSAL", "DATA DE ACERTO", "CATEGORIA", "TIPO", "RECORRENTE", "CONCILIADO"];
+
+                if (headers.length < expectedHeaders.length || !expectedHeaders.every((val, index) => headers[index].trim().toUpperCase() === val.toUpperCase())) {
+                    showMessage('Formato CSV inválido. Verifique se as colunas estão corretas e separadas por ponto e vírgula.', 'error');
+                    return;
+                }
+
+                const importedData = [];
+                for (let i = 1; i < lines.length; i++) {
+                    const values = lines[i].split(';');
+                    if (values.length >= expectedHeaders.length) {
+                        importedData.push({
+                            name: values[0].trim(),
+                            valorMensal: parseFloat(values[1].replace(',', '.')) || 0,
+                            date: values[2].trim(),
+                            category: values[3].trim(),
+                            type: values[4].trim(),
+                            recorrente: values[5].trim().toLowerCase() === 'sim',
+                            conciliado: values[6].trim().toLowerCase() === 'sim'
+                        });
+                    }
+                }
+
+                if (importedData.length > 0) {
+                    acertosTableBody.innerHTML = '';
+                    importedData.forEach(rowData => {
+                        const newRow = createNewRow(rowData);
+                        acertosTableBody.appendChild(newRow);
+                    });
+                    saveDataAndApplyFilters();
+                    showMessage('Dados importados com sucesso!', 'success');
+                } else {
+                    showMessage('Nenhum dado válido encontrado no CSV para importar.', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+
+        /**
+         * Mostra o modal de confirmação de exclusão.
+         * @param {HTMLTableRowElement} row - A linha da tabela a ser excluída.
+         */
+        function showConfirmModal(row) {
+            rowToDelete = row;
+            confirmModal.classList.remove('hidden');
+            rowToDelete.classList.add('highlight-remove');
+            setTimeout(() => {
+                rowToDelete.classList.remove('highlight-remove');
+            }, 1500);
+        }
+
+        /**
+         * Esconde o modal de confirmação de exclusão.
+         */
+        function hideConfirmModal() {
+            confirmModal.classList.add('hidden');
+            rowToDelete = null;
+        }
+
+        /**
+         * Atualiza a exibição da data e hora atual.
+         */
+        function updateCurrentDateTime() {
+            const now = new Date();
+            const options = {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            };
+            currentDatetimeSpan.textContent = now.toLocaleDateString('pt-BR', options);
+        }
+
+        /**
+         * Alterna o modo escuro.
+         */
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            localStorage.setItem(LOCAL_STORAGE_KEY_DARK_MODE, isDarkMode);
+            darkModeToggle.innerHTML = isDarkMode
+                ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                </svg> Modo Claro`
+                : `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                </svg> Modo Escuro`;
+        }
+
+        /**
+         * Anexa listeners de redimensionamento às colunas.
+         */
+        function attachResizerListeners() {
+            const resizers = document.querySelectorAll('.resizer');
+            resizers.forEach(resizer => {
+                resizer.addEventListener('mousedown', (e) => {
+                    isResizing = true;
+                    currentResizer = resizer;
+                    startX = e.clientX;
+                    currentTh = resizer.parentElement;
+                    startWidth = currentTh.offsetWidth;
+
+                    document.body.classList.add('resizing');
+                });
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isResizing) return;
+
+                const diff = e.clientX - startX;
+                let newWidth = startWidth + diff;
+
+                const minWidth = 50;
+                if (newWidth < minWidth) {
+                    newWidth = minWidth;
+                }
+
+                currentTh.style.width = newWidth + 'px';
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (!isResizing) return;
+                isResizing = false;
+                currentResizer = null;
+                currentTh = null;
+                document.body.classList.remove('resizing');
+                saveColumnWidths();
+                pushStateToHistory();
+            });
+        }
+
+        /**
+         * Salva as larguras atuais das colunas no localStorage.
+         */
+        function saveColumnWidths() {
+            const headerCells = document.querySelectorAll('#acertos-mensais-tab thead th');
+            const widths = [];
+            for (let i = 0; i < headerCells.length; i++) {
+                widths.push(headerCells[i].offsetWidth);
+            }
+            localStorage.setItem(LOCAL_STORAGE_KEY_COLUMN_WIDTHS, JSON.stringify(widths));
+        }
+
+        /**
+         * Carrega as larguras das colunas do localStorage e as aplica.
+         */
+        function loadColumnWidths() {
+            const savedWidths = localStorage.getItem(LOCAL_STORAGE_KEY_COLUMN_WIDTHS);
+            if (savedWidths) {
+                const widths = JSON.parse(savedWidths);
+                const headerCells = document.querySelectorAll('#acertos-mensais-tab thead th');
+                for (let i = 0; i < headerCells.length; i++) {
+                    if (widths[i]) {
+                        headerCells[i].style.width = widths[i] + 'px';
+                    }
+                }
+            }
+        }
+
+        /**
+         * Popula o dropdown de anos com os anos presentes nos dados e alguns anos próximos.
+         */
+        function populateYearFilter() {
+            const currentYear = new Date().getFullYear();
+            const years = new Set();
+            years.add(currentYear.toString());
+            years.add((currentYear - 1).toString());
+            years.add((currentYear + 1).toString());
+
+            // Adicionar anos das datas existentes na planilha
+            const allData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_DATA) || '[]');
+            allData.forEach(item => {
+                if (item.date) {
+                    years.add(new Date(item.date).getFullYear().toString());
+                }
+            });
+
+            const sortedYears = Array.from(years).sort((a, b) => parseInt(b) - parseInt(a)); // Ordem decrescente
+
+            filterYearSelect.innerHTML = '<option value="">Todos os Anos</option>';
+            sortedYears.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                filterYearSelect.appendChild(option);
+            });
+        }
+
+
+        // --- Listeners de Eventos ---
+
+        // Listener para o botão "Adicionar Linha"
+        addRowBtn.addEventListener('click', () => {
+            const newRow = createNewRow();
+            acertosTableBody.appendChild(newRow);
+            newRow.classList.add('highlight-add');
+            setTimeout(() => {
+                newRow.classList.remove('highlight-add');
+            }, 1500);
+            saveDataAndApplyFilters();
+        });
+
+        // Listener para o botão "Salvar Dados" (salvamento manual)
+        saveDataBtn.addEventListener('click', () => {
+            saveData();
+            showMessage('Dados salvos manualmente!', 'success');
+        });
+
+        // Listener para o botão "Exportar CSV"
+        exportCsvBtn.addEventListener('click', exportToCsv);
+
+        // Listener para o botão "Importar CSV" para disparar o input de arquivo
+        importCsvBtn.addEventListener('click', () => {
+            importCsvInput.click();
+        });
+        // Listener para quando um arquivo é selecionado no input de importação
+        importCsvInput.addEventListener('change', importFromCsv);
+
+
+        // Listeners para os filtros e pesquisa
+        searchInput.addEventListener('input', applyFiltersAndSearch);
+        filterCategorySelect.addEventListener('change', applyFiltersAndSearch);
+        filterTypeSelect.addEventListener('change', applyFiltersAndSearch);
+        filterRecorrenteSelect.addEventListener('change', applyFiltersAndSearch);
+        filterConciliadoSelect.addEventListener('change', applyFiltersAndSearch);
+        filterMonthSelect.addEventListener('change', applyFiltersAndSearch);
+        filterYearSelect.addEventListener('change', applyFiltersAndSearch);
+        filterStartDateInput.addEventListener('change', applyFiltersAndSearch);
+        filterEndDateInput.addEventListener('change', applyFiltersAndSearch);
+
+        // Listeners para gerenciamento de categorias
+        addCategoryBtn.addEventListener('click', addCategory);
+        removeCategoryBtn.addEventListener('click', removeCategory);
+
+        // Listeners para ordenação da tabela
+        document.querySelectorAll('.sortable-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const sortBy = header.dataset.sortBy;
+                if (sortBy) {
+                    sortTable(sortBy);
+                }
+            });
+        });
+
+        // Listeners do Modal de Confirmação
+        confirmDeleteBtn.addEventListener('click', () => {
+            if (rowToDelete) {
+                rowToDelete.remove();
+                saveDataAndApplyFilters();
+                showMessage('Linha removida com sucesso!', 'success');
+            }
+            hideConfirmModal();
+        });
+
+        cancelDeleteBtn.addEventListener('click', hideConfirmModal);
+
+        // Listener para o botão de modo escuro
+        darkModeToggle.addEventListener('click', toggleDarkMode);
+
+        // Listener para o input de orçamento mensal
+        monthlyBudgetInput.addEventListener('input', () => {
+            saveData();
+            updateTotal();
+        });
+
+        // Listeners para Desfazer/Refazer
+        undoBtn.addEventListener('click', undo);
+        redoBtn.addEventListener('click', redo);
+
+
+        // Configuração inicial: Carregar dados quando a página carrega
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            populateYearFilter();
+
+            const isDarkModeEnabled = localStorage.getItem(LOCAL_STORAGE_KEY_DARK_MODE) === 'true';
+            if (isDarkModeEnabled) {
+                document.body.classList.add('dark-mode');
+                darkModeToggle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                </svg> Modo Claro`;
+            } else {
+                 darkModeToggle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                </svg> Modo Escuro`;
+            }
+            updateUndoRedoButtons();
+            attachResizerListeners();
+
+            updateCurrentDateTime();
+            setInterval(updateCurrentDateTime, 1000);
+        });
+    </script>
+</body>
+</html>
+
+
+
+
