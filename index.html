@@ -1984,8 +1984,8 @@
 <!-- Supabase Client -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  const SUPABASE_URL = "https://wutgchhrcovbrzynefiu.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1dGdjaGhyY292YnJ6eW5lZml1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIxNTczMDIsImV4cCI6MjA2NzczMzMwMn0.I6KV9MpO_dHD-GI3KFKXFVnZJIOiHsQ0RoKXdJ9staU";
+  const SUPABASE_URL = "https://owiajqvxyjxzgpwynzpg.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93aWFqcXZ4eWp4emdwd3luenBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIxNTg3OTYsImV4cCI6MjA2NzczNDc5Nn0.QLr2Pvq07RuafYEmT_QWiFOEb8tDji3obv3gL1ypGuM";
   const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   async function carregarDadosSupabase() {
@@ -1994,8 +1994,10 @@
       console.error("Erro ao carregar dados:", error);
       return;
     }
+    acertosTableBody.innerHTML = "";
     data.forEach(dado => {
       const novaLinha = createNewRow({
+        id: dado.id,
         name: dado.nome,
         valorMensal: dado.valor_mensal,
         date: dado.data_acerto,
@@ -2026,7 +2028,6 @@
     }
   }
 
-  // Substitui o saveDataAndApplyFilters
   function saveDataAndApplyFilters() {
     const dados = getCurrentTableData();
     if (dados.length > 0) {
@@ -2035,7 +2036,6 @@
     updateTotal();
   }
 
-  // Substitui o carregamento localStorage
   window.addEventListener("DOMContentLoaded", () => {
     carregarDadosSupabase();
   });
