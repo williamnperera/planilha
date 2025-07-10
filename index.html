@@ -1982,14 +1982,14 @@
     </script>
 
 <!-- Supabase Client -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1.35.6"></script>
 <script>
   const SUPABASE_URL = "https://owiajqvxyjxzgpwynzpg.supabase.co";
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93aWFqcXZ4eWp4emdwd3luenBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIxNTg3OTYsImV4cCI6MjA2NzczNDc5Nn0.QLr2Pvq07RuafYEmT_QWiFOEb8tDji3obv3gL1ypGuM";
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   async function carregarDadosSupabase() {
-    const { data, error } = await supabase.from("acertos").select("*").order("criado_em", { ascending: true });
+    const { data, error } = await supa.from("acertos").select("*").order("criado_em", { ascending: true });
     if (error) {
       console.error("Erro ao carregar dados:", error);
       return;
@@ -2011,8 +2011,8 @@
     updateTotal();
   }
 
-  async function salvarDadoSupabase(dado) {
-    const { error } = await supabase.from("acertos").insert([{
+  async function salvarLinhaSupabase(dado) {
+    const { error } = await supa.from("acertos").insert([{
       nome: dado.name,
       valor_mensal: dado.valorMensal,
       data_acerto: dado.date,
@@ -2023,15 +2023,16 @@
     }]);
     if (error) {
       console.error("Erro ao salvar:", error);
+      showMessage("Erro ao salvar", "error");
     } else {
-      showMessage("Dado salvo com sucesso!");
+      showMessage("Salvo com sucesso!");
     }
   }
 
   function saveDataAndApplyFilters() {
     const dados = getCurrentTableData();
     if (dados.length > 0) {
-      salvarDadoSupabase(dados[dados.length - 1]);
+      salvarLinhaSupabase(dados[dados.length - 1]);
     }
     updateTotal();
   }
